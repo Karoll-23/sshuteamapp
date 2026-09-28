@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Танцы — запись на занятия</title>
+
+<!-- ===== PWA / iOS метатеги ===== -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Танцы">
+<meta name="theme-color" content="#ff5a5f">
+<link id="manifest-link" rel="manifest" href="">
+<link id="apple-icon" rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23ff5a5f'/%3E%3Ctext x='90' y='122' font-size='100' font-family='Helvetica' font-weight='bold' fill='white' text-anchor='middle'%3EТ%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23ff5a5f'/%3E%3Ctext x='90' y='122' font-size='100' font-family='Helvetica' font-weight='bold' fill='white' text-anchor='middle'%3EТ%3C/text%3E%3C/svg%3E">
+
+<!-- Устанавливаем тему до отрисовки, чтобы не было «вспышки» -->
+<script>
+  try {
+    var _st = JSON.parse(localStorage.getItem('dance_app_v1') || '{}');
+    var _t = (_st.settings && _st.settings.theme) || 'auto';
+    var _dark = _t === 'dark' || (_t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.dataset.theme = _dark ? 'dark' : 'light';
+  } catch (e) {}
+</script>
+
+<style>
+/* ============================ ТЕМЫ ============================ */
+:root{
+  --accent:#ff5a5f;
+  --accent-soft:rgba(255,90,95,.12);
+  --bg:#f2f2f7;
+  --card:#ffffff;
+  --text:#0b0b0c;
+  --muted:#8a8a8e;
+  --border:#e4e4e8;
+  --danger:#e5484d;
+  --ok:#2fa84f;
+}
+html[data-theme="dark"]{
+  --bg:#000000;
+  --card:#1c1c1e;
+  --text:#f2f2f7;
+  --muted:#8e8e93;
+  --border:#2c2c2e;
+  --accent-soft:rgba(255,90,95,.2);
+}
+
+/* ============================ БАЗА ============================ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:16px;
+  line-height:1.35;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+h1,h2,h3{margin:0}
+button,a,input,textarea,select{font-family:inherit;font-size:16px}
+button{touch-action:manipulation;cursor:pointer}
+
+/* ============================ ШАПКА ============================ */
+.page-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:14px 4px 10px;
+}
+.page-head h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
+
+#view{padding:0 12px calc(96px + env(safe-area-inset-bottom));min-height:100%}
+
+/* ============================ КНОПКИ ============================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:44px;padding:0 16px;border-radius:12px;
+  border:1px solid var(--border);background:var(--card);color:var(--text);
+  font-size:15px;font-weight:600;text-decoration:none;
+  transition:transform .08s ease,opacity .15s ease;
+}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.block{display:flex;width:100%;margin-bottom:10px}
+.btn.sm{min-height:38px;padding:0 14px;font-size:14px;border-radius:11px}
+
+.icon-btn{
+  width:38px;height:38px;min-width:38px;border-radius:50%;
+  border:none;background:var(--bg);color:var(--muted);
+  font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;
+}
+.icon-btn:active{opacity:.6}
+
+/* ============================ КАРТОЧКИ ============================ */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:14px;margin-bottom:10px;
+}
+.card-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px}
+.section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:18px 4px 8px}
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:15px;line-height:1.5}
+.empty.small{padding:18px 10px;font-size:14px}
+.muted{color:var(--muted);font-size:14px;margin:0 0 12px}
+
+/* Карточка занятия */
+.lesson-card{display:block}
+.lesson-card:active{background:var(--accent-soft)}
+.lc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.lc-date{font-size:14px;font-weight:700;color:var(--accent)}
+.lc-time{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lc-title{font-size:17px;font-weight:700;margin-bottom:2px}
+.lc-sub{font-size:14px;color:var(--muted);margin-bottom:8px}
+.lc-stats{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--muted)}
+.lc-stats b{color:var(--text)}
+
+/* Строки-карточки (ученики) */
+.row-card{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.row-card:active{background:var(--accent-soft)}
+.avatar{
+  width:40px;height:40px;min-width:40px;border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:15px;text-transform:uppercase;
+}
+.row-main{flex:1;min-width:0}
+.row-title{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-sub{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chev{color:var(--muted);font-size:20px;line-height:1}
+
+/* Поиск */
+.searchbar{margin-bottom:10px}
+input[type="search"],input[type="text"],input[type="tel"],input[type="number"],input[type="date"],input[type="time"],textarea,select{
+  width:100%;min-height:44px;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--border);background:var(--card);color:var(--text);
+  font-size:16px;appearance:none;-webkit-appearance:none;
+}
+textarea{min-height:60px;resize:vertical;line-height:1.4}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+
+/* Формы */
+.field{display:block;margin-bottom:12px}
+.field > span{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Сегментированный переключатель */
+.segmented{display:flex;background:var(--bg);border-radius:12px;padding:3px;gap:3px}
+.segmented button{
+  flex:1;min-height:38px;border:none;background:transparent;color:var(--muted);
+  border-radius:9px;font-size:14px;font-weight:600;
+}
+.segmented button.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* Строки «ключ — значение» */
+.kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:15px}
+.kv > span{color:var(--muted)}
+
+/* ============================ НИЖНЯЯ НАВИГАЦИЯ ============================ */
+#tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  display:flex;
+  background:color-mix(in srgb, var(--card) 92%, transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-top:1px solid var(--border);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#tabbar button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-height:56px;border:none;background:transparent;color:var(--muted);
+  font-size:10px;font-weight:600;letter-spacing:.1px;
+}
+#tabbar button.active{color:var(--accent)}
+#tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ============================ ШТОРКИ (BOTTOM SHEETS) ============================ */
+.overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.45);
+  display:flex;align-items:flex-end;
+  animation:fade .18s ease;
+}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{
+  width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--card);
+  border-radius:22px 22px 0 0;
+  padding:8px 16px calc(24px + env(safe-area-inset-bottom));
+  animation:slideUp .28s cubic-bezier(.22,.85,.3,1);
+  overscroll-behavior:contain;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.sheet-head{margin-bottom:12px}
+.grabber{width:38px;height:5px;border-radius:3px;background:var(--border);margin:6px auto 12px}
+.sheet-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sheet-title-row h2{font-size:21px;font-weight:800;letter-spacing:-.4px}
+.sheet-sub{font-size:14px;color:var(--muted);margin-top:3px}
+.note{margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:12px;font-size:14px;color:var(--muted)}
+
+.counter-line{
+  font-size:13px;font-weight:600;color:var(--muted);
+  background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:12px;
+  text-align:center;
+}
+
+.sheet-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sheet-actions .btn{flex:1 1 0;min-width:calc(50% - 4px)}
+
+/* Блок записи на занятие */
+.enr{border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:10px}
+.enr-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.enr-name{font-size:16px;font-weight:600;flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.chips:last-child{margin-bottom:0}
+.chip{
+  min-height:36px;padding:0 12px;border-radius:999px;
+  border:1px solid var(--border);background:var(--card);color:var(--muted);
+  font-size:13px;font-weight:600;
+}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.amount-input{
+  width:86px;min-height:36px;padding:0 10px;border-radius:999px;
+  font-size:14px;text-align:center;
+}
+
+/* Переключатель «обернуть в блок-код» */
+.switch-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:15px;min-height:44px}
+.switch-row input{width:22px;height:22px;min-height:22px;accent-color:var(--accent)}
+
+/* Тост */
+#toast{
+  position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));
+  transform:translate(-50%,16px);
+  background:rgba(30,30,32,.94);color:#fff;
+  padding:11px 18px;border-radius:14px;font-size:14px;font-weight:500;
+  opacity:0;pointer-events:none;transition:all .25s ease;z-index:999;
+  max-width:88vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<!-- ============================ ОСНОВНОЙ ЭКРАН ============================ -->
+<main id="view"></main>
+
+<!-- ============================ НИЖНИЕ ВКЛАДКИ ============================ -->
+<nav id="tabbar">
+  <button data-action="tab" data-tab="schedule">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+    <span>Расписание</span>
+  </button>
+  <button data-action="tab" data-tab="students">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg>
+    <span>Ученики</span>
+  </button>
+  <button data-action="tab" data-tab="settings">
+    <svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h3M13 17h7"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
+    <span>Настройки</span>
+  </button>
+</nav>
+
+<!-- Сюда рендерятся шторки -->
+<div id="sheets"></div>
+<div id="toast"></div>
+
+<!-- ============================ CDN: pdfmake + Roboto (кириллица) ============================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+/* =====================================================================
+   ТАНЦЫ — учёт записей на занятия
+   Чистый JS, без фреймворков. Данные — в localStorage.
+   ===================================================================== */
+
+/* ------------------------- Утилиты ------------------------- */
+const $  = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+/** Уникальный id */
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = n => String(n).padStart(2, '0');
+
+/** Экранирование HTML */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/** Сегодняшняя дата в формате YYYY-MM-DD */
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function parseISO(iso) {
+  const [y, m, d] = String(iso).split('-').map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
+const WD = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+/** 30.09.2026 */
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = parseISO(iso);
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+/** 30.09, Пн */
+function fmtDateShort(iso) {
+  if (!iso) return '';
+  const d = parseISO(iso);
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}, ${WD[d.getDay()]}`;
+}
+function fmtMoney(n) {
+  return (Number(n) || 0).toLocaleString('ru-RU') + ' ₽';
+}
+function initials(name) {
+  return String(name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('');
+}
+/** Склонение: plural(5,'место','места','мест') */
+function plural(n, one, few, many) {
+  const n10 = n % 10, n100 = n % 100;
+  if (n10 === 1 && n100 !== 11) return one;
+  if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return few;
+  return many;
+}
+
+/* ------------------------- Справочники ------------------------- */
+const STATUSES = [
+  { k: 'booked',    l: 'Записан'   },
+  { k: 'attended',  l: 'Пришёл'    },
+  { k: 'missed',    l: 'Не пришёл' },
+  { k: 'cancelled', l: 'Отменил'   }
+];
+const PAYMENTS = [
+  { k: 'paid',    l: 'Оплачено'    },
+  { k: 'unpaid',  l: 'Не оплачено' },
+  { k: 'partial', l: 'Частично'    }
+];
+const statusLabel  = k => (STATUSES.find(s => s.k === k) || {}).l || k;
+const paymentLabel = k => (PAYMENTS.find(p => p.k === k) || {}).l || k;
+
+/* ------------------------- Хранилище ------------------------- */
+const STORAGE_KEY = 'dance_app_v1';
+const DEFAULT_SETTINGS = { theme: 'auto', capacity: 10 };
+
+let state = {
+  students: [],
+  lessons: [],
+  settings: { ...DEFAULT_SETTINGS }
+};
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    state.students = Array.isArray(data.students) ? data.students : [];
+    state.lessons  = Array.isArray(data.lessons)  ? data.lessons  : [];
+    state.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings || {});
+    // нормализуем занятия
+    state.lessons.forEach(l => {
+      l.enrollments = Array.isArray(l.enrollments) ? l.enrollments : [];
+      l.capacity = Number(l.capacity) || DEFAULT_SETTINGS.capacity;
+    });
+  } catch (e) {
+    console.warn('Не удалось прочитать данные:', e);
+  }
+}
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    toast('Не удалось сохранить данные');
+  }
+}
+
+/* ------------------------- Тема ------------------------- */
+function applyTheme() {
+  const t = state.settings.theme || 'auto';
+  const dark = t === 'dark' ||
+    (t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+}
+// Реакция на смену системной темы (если выбран режим «Авто»)
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', applyTheme);
+else if (mq.addListener) mq.addListener(applyTheme);
+
+/* ------------------------- Тост ------------------------- */
+let toastTimer = null;
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* =====================================================================
+   ПОДСЧЁТЫ
+   ===================================================================== */
+function lessonCounts(l) {
+  const e = l.enrollments || [];
+  const booked   = e.filter(x => x.status === 'booked').length;
+  const attended = e.filter(x => x.status === 'attended').length;
+  const missed   = e.filter(x => x.status === 'missed').length;
+  const paidCount = e.filter(x => x.payment === 'paid').length;
+  const sum = e.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+  return { total: e.length, booked, attended, missed, paidCount, sum, active: booked + attended };
+}
+function findEnrollment(lessonId, enrId) {
+  const l = state.lessons.find(x => x.id === lessonId);
+  return l ? (l.enrollments || []).find(e => e.id === enrId) : null;
+}
+function enrollStudent(lessonId, studentId) {
+  const l = state.lessons.find(x => x.id === lessonId);
+  if (!l) return;
+  l.enrollments = l.enrollments || [];
+  if (l.enrollments.some(e => e.studentId === studentId)) return;
+  l.enrollments.push({
+    id: uid(), studentId,
+    status: 'booked', payment: 'unpaid', amount: 0, note: ''
+  });
+  save();
+}
+
+/* =====================================================================
+   ЭКРАН: РАСПИСАНИЕ
+   ===================================================================== */
+function lessonCardHTML(l) {
+  const c = lessonCounts(l);
+  const sub = [l.hall, l.teacher].filter(Boolean).map(esc).join(' · ') || '—';
+  return `
+  <div class="card lesson-card" data-action="open-lesson" data-id="${l.id}">
+    <div class="lc-top">
+      <span class="lc-date">${esc(fmtDateShort(l.date))}</span>
+      <span class="lc-time">${esc(l.start || '')}${l.end ? '–' + esc(l.end) : ''}</span>
+    </div>
+    <div class="lc-title">${esc(l.direction || 'Без направления')}</div>
+    <div class="lc-sub">${sub}</div>
+    <div class="lc-stats">
+      <span>Записано: <b>${c.active}</b></span>
+      <span>Пришло: <b>${c.attended}</b></span>
+      <span>Оплачено: <b>${c.paidCount}</b></span>
+    </div>
+  </div>`;
+}
+
+function scheduleHTML() {
+  const today = todayISO();
+  const all = [...state.lessons].sort((a, b) =>
+    (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
+
+  let html = `<div class="page-head">
+      <h1>Расписание</h1>
+      <button class="btn primary sm" data-action="new-lesson">+ Занятие</button>
+    </div>`;
+
+  if (!all.length) {
+    return html + `<div class="empty">Пока нет ни одного занятия.<br>Нажмите «+ Занятие», чтобы создать первое.</div>`;
+  }
+
+  const upcoming = all.filter(l => l.date >= today);
+  const past = all.filter(l => l.date < today).reverse();
+
+  if (upcoming.length) {
+    html += `<div class="section-title">Ближайшие</div>` + upcoming.map(lessonCardHTML).join('');
+  }
+  if (past.length) {
+    html += `<div class="section-title">Прошедшие</div>` + past.map(lessonCardHTML).join('');
+  }
+  return html;
+}
+
+/* =====================================================================
+   ЭКРАН: УЧЕНИКИ
+   ===================================================================== */
+let studentQuery = '';
+
+function studentRowHTML(s) {
+  const visits = state.lessons.filter(l =>
+    (l.enrollments || []).some(e => e.studentId === s.id)).length;
+  const searchKey = (s.name + ' ' + (s.phone || '')).toLowerCase();
+  return `
+  <div class="card row-card" data-action="open-student" data-id="${s.id}"
+       data-search="${esc(searchKey)}">
+    <div class="avatar">${esc(initials(s.name))}</div>
+    <div class="row-main">
+      <div class="row-title">${esc(s.name)}</div>
+      <div class="row-sub">${esc(s.phone || 'без телефона')} · занятий: ${visits}</div>
+    </div>
+    <div class="chev">›</div>
+  </div>`;
+}
+
+function studentsHTML() {
+  const list = [...state.students].sort((a, b) =>
+    String(a.name).localeCompare(String(b.name), 'ru'));
+
+  let html = `<div class="page-head">
+      <h1>Ученики</h1>
+      <button class="btn primary sm" data-action="new-student">+ Ученик</button>
+    </div>`;
+
+  if (!list.length) {
+    return html + `<div class="empty">База учеников пуста.<br>Добавьте первого ученика.</div>`;
+  }
+
+  html += `<div class="searchbar">
+      <input id="student-search" type="search" placeholder="Поиск по имени или телефону"
+             value="${esc(studentQuery)}" enterkeyhint="search">
+    </div>
+    <div id="students-list">${list.map(studentRowHTML).join('')}</div>`;
+  return html;
+}
+
+/* =====================================================================
+   ЭКРАН: НАСТРОЙКИ
+   ===================================================================== */
+function settingsHTML() {
+  const t = state.settings.theme || 'auto';
+  const totalEnrollments = state.lessons.reduce((s, l) => s + (l.enrollments || []).length, 0);
+
+  return `
+  <div class="page-head"><h1>Настройки</h1></div>
+
+  <div class="card">
+    <div class="card-title">Тема оформления</div>
+    <div class="segmented">
+      <button data-action="set-theme" data-value="auto"  class="${t === 'auto'  ? 'active' : ''}">Авто</button>
+      <button data-action="set-theme" data-value="light" class="${t === 'light' ? 'active' : ''}">Светлая</button>
+      <button data-action="set-theme" data-value="dark"  class="${t === 'dark'  ? 'active' : ''}">Тёмная</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Данные</div>
+    <p class="muted">⚠️ Данные хранятся только на этом устройстве. Делайте бэкап регулярно.</p>
+    <button class="btn block" data-action="export">⬇️ Экспорт JSON</button>
+    <button class="btn block" data-action="import">⬆️ Импорт JSON</button>
+    <input type="file" id="import-file" accept="application/json,.json" hidden>
+    <button class="btn block danger" data-action="clear-all">🗑 Удалить все данные</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Статистика</div>
+    <div class="kv"><span>Учеников</span><b>${state.students.length}</b></div>
+    <div class="kv"><span>Занятий</span><b>${state.lessons.length}</b></div>
+    <div class="kv"><span>Записей на занятия</span><b>${totalEnrollments}</b></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">О приложении</div>
+    <p class="muted">Версия 1.0 · Работает офлайн, без сервера и регистрации.</p>
+    <p class="muted">Добавить на экран «Домой»: в Safari нажмите «Поделиться» → «На экран “Домой”».</p>
+  </div>`;
+}
+
+/* =====================================================================
+   РЕНДЕР
+   ===================================================================== */
+let activeTab = 'schedule';
+
+function renderTabbar() {
+  $$('#tabbar button').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === activeTab));
+}
+
+function renderView() {
+  const view = $('#view');
+  if (activeTab === 'schedule')      view.innerHTML = scheduleHTML();
+  else if (activeTab === 'students') view.innerHTML = studentsHTML();
+  else                               view.innerHTML = settingsHTML();
+  renderTabbar();
+  afterRender();
+}
+
+/** Навешиваем обработчики, которые нельзя сделать делегированием */
+function afterRender() {
+  // Поиск по ученикам — фильтруем без перерисовки, чтобы не терять фокус
+  const search = $('#student-search');
+  if (search) {
+    const apply = () => {
+      studentQuery = search.value;
+      const q = studentQuery.trim().toLowerCase();
+      $$('#students-list [data-search]').forEach(row => {
+        row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+      });
+    };
+    search.addEventListener('input', apply);
+    if (studentQuery) apply();
+  }
+  // Импорт файла
+  const file = $('#import-file');
+  if (file) file.addEventListener('change', onImportFile);
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  renderView();
+  window.scrollTo(0, 0);
+}
+
+/* =====================================================================
+   СИСТЕМА ШТОРОК (стек)
+   ===================================================================== */
+let sheets = [];
+
+function pushSheet(sheet) {
+  sheets.push(sheet);
+  const root = $('#sheets');
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.dataset.sheetId = sheet.id;
+  ov.style.zIndex = String(100 + sheets.length * 10);
+  ov.innerHTML = `<div class="sheet">${sheet.html()}</div>`;
+  root.appendChild(ov);
+  const sheetEl = ov.querySelector('.sheet');
+  if (sheet.mount) sheet.mount(sheetEl);
+}
+
+function closeSheet(id) {
+  const i = sheets.findIndex(s => s.id === id);
+  if (i < 0) return;
+  const ov = $(`#sheets [data-sheet-id="${id}"]`);
+  if (ov) ov.remove();
+  sheets.splice(i, 1);
+}
+
+/** Обновляет содержимое всех открытых шторок, сохраняя прокрутку */
+function renderSheetsContent() {
+  sheets.slice().forEach(s => {
+    const el = $(`#sheets [data-sheet-id="${s.id}"] .sheet`);
+    if (!el) return;
+    const html = s.html();
+    if (!html) { closeSheet(s.id); return; }
+    const scroll = el.scrollTop;
+    el.innerHTML = html;
+    if (s.mount) s.mount(el);
+    el.scrollTop = scroll;
+  });
+}
+
+/** Полное обновление интерфейса */
+function refresh() {
+  renderView();
+  renderSheetsContent();
+}
+
+/* =====================================================================
+   ШТОРКА: КАРТОЧКА ЗАНЯТИЯ
+   ===================================================================== */
+function enrollmentHTML(l, e) {
+  const s = state.students.find(x => x.id === e.studentId);
+  const name = s ? s.name : 'Удалённый ученик';
+  const nameAttrs = s ? `data-action="open-student" data-id="${s.id}"` : '';
+  return `
+  <div class="enr">
+    <div class="enr-head">
+      <div class="enr-name" ${nameAttrs}>${esc(name)}</div>
+      <button class="icon-btn" data-action="remove-enrollment"
+              data-lesson="${l.id}" data-enr="${e.id}">✕</button>
+    </div>
+    <div class="chips">
+      ${STATUSES.map(st => `
+        <button class="chip ${e.status === st.k ? 'active' : ''}"
+                data-action="set-status" data-lesson="${l.id}" data-enr="${e.id}"
+                data-value="${st.k}">${st.l}</button>`).join('')}
+    </div>
+    <div class="chips">
+      ${PAYMENTS.map(p => `
+        <button class="chip ${e.payment === p.k ? 'active' : ''}"
+                data-action="set-payment" data-lesson="${l.id}" data-enr="${e.id}"
+                data-value="${p.k}">${p.l}</button>`).join('')}
+      <input class="amount-input" type="number" inputmode="numeric" placeholder="₽"
+             data-action="set-amount" data-lesson="${l.id}" data-enr="${e.id}"
+             value="${e.amount ? esc(String(e.amount)) : ''}">
+    </div>
+  </div>`;
+}
+
+function lessonSheet(id) {
+  const sheetId = 'lesson-' + id;
+  return {
+    id: sheetId,
+    html() {
+      const l = state.lessons.find(x => x.id === id);
+      if (!l) return '';
+      const c = lessonCounts(l);
+      const list = l.enrollments || [];
+      const meta = [l.hall, l.teacher ? 'Преподаватель: ' + l.teacher : '']
+        .filter(Boolean).map(esc).join(' · ');
+
+      return `
+      <div class="sheet-head">
+        <div class="grabber"></div>
+        <div class="sheet-title-row">
+          <h2>${esc(l.direction || 'Занятие')}</h2>
+          <button class="icon-btn" data-action="close-sheet" data-sheet="${sheetId}">✕</button>
+        </div>
+        <div class="sheet-sub">${esc(fmtDate(l.date))} · ${esc(l.start || '')}${l.end ? '–' + esc(l.end) : ''}</div>
+        ${meta ? `<div class="sheet-sub">${meta}</div>` : ''}
+        ${l.note ? `<div class="note">${esc(l.note)}</div>` : ''}
+      </div>
+
+      <div class="counter-line">
+        Записано: ${c.active} · Пришло: ${c.attended} · Оплачено: ${c.paidCount}
+      </div>
+
+      <div class="enrollments">
+        ${list.length ? list.map(e => enrollmentHTML(l, e)).join('')
+                      : '<div class="empty small">Никто не записан</div>'}
+      </div>
+
+      <button class="btn block" data-action="add-student-to-lesson" data-id="${l.id}">+ Добавить ученика</button>
+
+      <div class="sheet-actions">
+        <button class="btn" data-action="pdf" data-id="${l.id}">📄 PDF</button>
+        <button class="btn" data-action="post" data-id="${l.id}">💬 Пост</button>
+        <button class="btn" data-action="edit-lesson" data-id="${l.id}">✏️ Изменить</button>
+        <button class="btn danger" data-action="delete-lesson" data-id="${l.id}">🗑 Удалить</button>
+      </div>`;
+    }
+  };
+}
+
+/* =====================================================================
+   ШТОРКА: ДОБАВЛЕНИЕ УЧЕНИКА НА ЗАНЯТИЕ
+   ===================================================================== */
+function addStudentSheet(lessonId) {
+  const sheetId = 'add-student-' + lessonId;
+  return {
+    id: sheetId,
+    html() {
+      const l = state.lessons.find(x => x.id === lessonId);
+      if (!l) return '';
+      const enrolled = new Set((l.enrollments || []).map(e => e.studentId));
+      const list = state.students
+        .filter(s => !enrolled.has(s.id))
+        .sort((a, b) => String(a.name).localeCompare(String(b.name), 'ru'));
+
+      return `
+      <div class="sheet-head">
+        <div class="grabber"></div>
+        <div class="sheet-title-row">
+          <h2>Добавить ученика</h2>
+          <button class="icon-btn" data-action="close-sheet" data-sheet="${sheetId}">✕</button>
+        </div>
+      </div>
+
+      <div class="searchbar">
+        <input class="js-sheet-search" type="search" placeholder="Поиск по имени">
+      </div>
+
+      <div class="js-sheet-list">
+        ${list.length ? list.map(s => `
+          <div class="card row-card" data-action="pick-student"
+               data-lesson="${lessonId}" data-id="${s.id}"
+               data-search="${esc(String(s.name).toLowerCase())}">
+            <div class="avatar">${esc(initials(s.name))}</div>
+            <div class="row-main">
+              <div class="row-title">${esc(s.name)}</div>
+              <div class="row-sub">${esc(s.phone || '')}</div>
+            </div>
+          </div>`).join('')
+          : '<div class="empty small">Нет подходящих учеников</div>'}
+      </div>
+
+      <button class="btn block primary" data-action="create-student-for-lesson"
+              data-lesson="${lessonId}">+ Новый ученик</button>`;
+    },
+    mount(el) {
+      const input = el.querySelector('.js-sheet-search');
+      if (!input) return;
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        el.querySelectorAll('.js-sheet-list [data-search]').forEach(row => {
+          row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+        });
+      });
+    }
+  };
+}
+
+/* =====================================================================
+   ШТОРКА: ФОРМА УЧЕНИКА (создание / редактирование)
+   ===================================================================== */
+function studentFormSheet(studentId, opts) {
+  const isEdit = !!studentId;
+  const s = isEdit ? state.students.find(x => x.id === studentId) : null;
+  const lessonId = opts && opts.lessonId ? opts.lessonId : null;
+  const sheetId = 'student-form-' + (studentId || 'new') + (lessonId ? '-' + lessonId : '');
+
+  return {
+    id: sheetId,
+    html() {
+      return `
+      <div class="sheet-head">
+        <div class="grabber"></div>
+        <div class="sheet-title-row">
+          <h2>${isEdit ? 'Ученик' : 'Новый ученик'}</h2>
+          <button class="icon-btn" data-action="close-sheet" data-sheet="${sheetId}">✕</button>
+        </div>
+      </div>
+
+      <form class="js-student-form">
+        <label class="field"><span>Имя *</span>
+          <input name="name" required value="${esc(s ? s.name : '')}" placeholder="Анна Иванова"></label>
+        <label class="field"><span>Телефон</span>
+          <input name="phone" type="tel" value="${esc(s ? (s.phone || '') : '')}" placeholder="+7 900 000-00-00"></label>
+        <label class="field"><span>Заметка</span>
+          <textarea name="note" rows="2">${esc(s ? (s.note || '') : '')}</textarea></label>
+
+        <button class="btn primary block" type="submit">${isEdit ? 'Сохранить' : 'Добавить'}</button>
+        ${isEdit ? `<button class="btn block danger" type="button"
+                      data-action="delete-student" data-id="${studentId}">Удалить ученика</button>` : ''}
+      </form>`;
+    },
+    mount(el) {
+      const form = el.querySelector('.js-student-form');
+      if (!form) return;
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const f = new FormData(form);
+        const name = String(f.get('name') || '').trim();
+        if (!name) { toast('Укажите имя'); return; }
+        const phone = String(f.get('phone') || '').trim();
+        const note = String(f.get('note') || '').trim();
+
+        if (isEdit) {
+          Object.assign(s, { name, phone, note });
+        } else {
+          const ns = {
+            id: uid(), name, phone, note,
+            createdAt: new Date().toISOString()
+          };
+          state.students.push(ns);
+          // Если создаём из карточки занятия — сразу записываем на него
+          if (lessonId) enrollStudent(lessonId, ns.id);
+        }
+        save();
+        closeSheet(sheetId);
+        refresh();
+        toast(isEdit ? 'Сохранено' : 'Ученик добавлен');
+      });
+    }
+  };
+}
+
+/* =====================================================================
+   ШТОРКА: КАРТОЧКА УЧЕНИКА
+   ===================================================================== */
+function studentSheet(id) {
+  const sheetId = 'student-' + id;
+  return {
+    id: sheetId,
+    html() {
+      const s = state.students.find(x => x.id === id);
+      if (!s) return '';
+
+      const history = state.lessons
+        .filter(l => (l.enrollments || []).some(e => e.studentId === id))
+        .sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
+
+      const created = s.createdAt ? fmtDate(String(s.createdAt).slice(0, 10)) : '—';
+
+      return `
+      <div class="sheet-head">
+        <div class="grabber"></div>
+        <div class="sheet-title-row">
+          <h2>${esc(s.name)}</h2>
+          <button class="icon-btn" data-action="close-sheet" data-sheet="${sheetId}">✕</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="kv"><span>Телефон</span><b>${esc(s.phone || '—')}</b></div>
+        <div class="kv"><span>Добавлен</span><b>${esc(created)}</b></div>
+        ${s.note ? `<div class="kv"><span>Заметка</span><b>${esc(s.note)}</b></div>` : ''}
+      </div>
+
+      <div class="section-title">История посещений (${history.length})</div>
+      ${history.length ? history.map(l => {
+        const e = (l.enrollments || []).find(x => x.studentId === id);
+        const extra = e && e.amount ? ' · ' + fmtMoney(e.amount) : '';
+        return `
+        <div class="card row-card">
+          <div class="row-main">
+            <div class="row-title">${esc(fmtDateShort(l.date))} · ${esc(l.direction || 'Занятие')}</div>
+            <div class="row-sub">${esc(statusLabel(e.status))} · ${esc(paymentLabel(e.payment))}${esc(extra)}</div>
+          </div>
+        </div>`;
+      }).join('') : '<div class="empty small">Посещений пока нет</div>'}
+
+      <div class="sheet-actions">
+        <button class="btn" data-action="edit-student" data-id="${s.id}">✏️ Изменить</button>
+        ${s.phone ? `<a class="btn" href="tel:${esc(String(s.phone).replace(/[^\d+]/g, ''))}">📞 Позвонить</a>` : ''}
+      </div>`;
+    }
+  };
+}
+
+/* =====================================================================
+   ШТОРКА: ФОРМА ЗАНЯТИЯ
+   ===================================================================== */
+function lessonFormSheet(lessonId) {
+  const isEdit = !!lessonId;
+  const l = isEdit ? state.lessons.find(x => x.id === lessonId) : null;
+  const sheetId = 'lesson-form-' + (lessonId || 'new');
+
+  return {
+    id: sheetId,
+    html() {
+      const v = l || {
+        date: todayISO(), start: '19:00', end: '20:30',
+        direction: '', hall: '', teacher: '',
+        capacity: state.settings.capacity || 10, note: ''
+      };
+      return `
+      <div class="sheet-head">
+        <div class="grabber"></div>
+        <div class="sheet-title-row">
+          <h2>${isEdit ? 'Редактировать занятие' : 'Новое занятие'}</h2>
+          <button class="icon-btn" data-action="close-sheet" data-sheet="${sheetId}">✕</button>
+        </div>
+      </div>
+
+      <form class="js-lesson-form">
+        <div class="grid2">
+          <label class="field"><span>Дата *</span>
+            <input type="date" name="date" required value="${esc(v.date)}"></label>
+          <label class="field"><span>Мест всего</span>
+            <input type="number" name="capacity" min="0" value="${esc(String(v.capacity))}"></label>
+        </div>
+        <div class="grid2">
+          <label class="field"><span>Начало</span>
+            <input type="time" name="start" value="${esc(v.start)}"></label>
+          <label class="field"><span>Окончание</span>
+            <input type="time" name="end" value="${esc(v.end)}"></label>
+        </div>
+        <label class="field"><span>Направление</span>
+          <input name="direction" value="${esc(v.direction)}" placeholder="Танго / Сальса / Бальные"></label>
+        <label class="field"><span>Зал / место</span>
+          <input name="hall" value="${esc(v.hall)}" placeholder="Зал №2"></label>
+        <label class="field"><span>Преподаватель</span>
+          <input name="teacher" value="${esc(v.teacher)}" placeholder="Анна"></label>
+        <label class="field"><span>Заметка</span>
+          <textarea name="note" rows="2">${esc(v.note)}</textarea></label>
+
+        <button class="btn primary block" type="submit">Сохранить</button>
+      </form>`;
+    },
+    mount(el) {
+      const form = el.querySelector('.js-lesson-form');
+      if (!form) return;
+      form.addEventListener('submit', ev => {
+        ev.preventDefault();
+        const f = new FormData(form);
+        const date = String(f.get('date') || '');
+        if (!date) { toast('Укажите дату'); return; }
+
+        const data = {
+          date,
+          start: String(f.get('start') || ''),
+          end: String(f.get('end') || ''),
+          direction: String(f.get('direction') || '').trim(),
+          hall: String(f.get('hall') || '').trim(),
+          teacher: String(f.get('teacher') || '').trim(),
+          capacity: Number(f.get('capacity')) || DEFAULT_SETTINGS.capacity,
+          note: String(f.get('note') || '').trim()
+        };
+
+        if (isEdit) {
+          Object.assign(l, data);
+        } else {
+          state.lessons.push(Object.assign({ id: uid(), enrollments: [] }, data));
+        }
+        save();
+        closeSheet(sheetId);
+        refresh();
+        toast(isEdit ? 'Занятие обновлено' : 'Занятие создано');
+      });
+    }
+  };
+}
+
+/* =====================================================================
+   ШТОРКА: ПОСТ ДЛЯ ЧАТА
+   ===================================================================== */
+function buildPost(l) {
+  const list = (l.enrollments || []).filter(e =>
+    e.status === 'booked' || e.status === 'attended');
+
+  const cap = Number(l.capacity) || 0;
+  const free = Math.max(0, cap - list.length);
+
+  const lines = [];
+  lines.push(`📅 ${fmtDateShort(l.date)}`);
+  lines.push(`🕖 ${l.start || ''}${l.end ? '–' + l.end : ''}${l.direction ? ' · ' + l.direction : ''}`);
+
+  const place = [
+    l.hall,
+    l.teacher ? `Преподаватель: ${l.teacher}` : ''
+  ].filter(Boolean).join(' · ');
+  if (place) lines.push(`📍 ${place}`);
+
+  lines.push('');
+  if (list.length) {
+    lines.push('Записаны:');
+    list.forEach((e, i) => {
+      const s = state.students.find(x => x.id === e.studentId);
+      lines.push(`${i + 1}. ${s ? s.name : '—'}`);
+    });
+  } else {
+    lines.push('Записанных пока нет.');
+  }
+  lines.push('');
+  if (cap) lines.push(`Свободно: ${free} ${plural(free, 'место', 'места', 'мест')}`);
+
+  return lines.join('\n').trim();
+}
+
+/** Копирование в буфер (с фолбэком) */
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) { /* игнорируем, используем фолбэк */ }
+
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.top = '-1000px';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  ta.remove();
+  return true;
+}
+
+function postSheet(lessonId) {
+  const sheetId = 'post-' + lessonId;
+  return {
+    id: sheetId,
+    html() {
+      const l = state.lessons.find(x => x.id === lessonId);
+      if (!l) return '';
+      return `
+      <div class="sheet-head">
+        <div class="grabber"></div>
+        <div class="sheet-title-row">
+          <h2>Пост для чата</h2>
+          <button class="icon-btn" data-action="close-sheet" data-sheet="${sheetId}">✕</button>
+        </div>
+      </div>
+
+      <label class="switch-row">
+        <input type="checkbox" class="js-wrap-code">
+        <span>Обернуть в блок-код (для Telegram / WhatsApp)</span>
+      </label>
+
+      <textarea class="js-post-text" rows="14" readonly>${esc(buildPost(l))}</textarea>
+
+      <div class="sheet-actions">
+        <button class="btn primary js-copy-post" type="button">Скопировать</button>
+        <button class="btn js-share-post" type="button">Поделиться</button>
+      </div>`;
+    },
+    mount(el) {
+      const ta = el.querySelector('.js-post-text');
+      const cb = el.querySelector('.js-wrap-code');
+      if (!ta || !cb) return;
+      const base = ta.value;
+
+      cb.addEventListener('change', () => {
+        ta.value = cb.checked ? '```\n' + base + '\n```' : base;
+      });
+
+      el.querySelector('.js-copy-post').addEventListener('click', async () => {
+        await copyText(ta.value);
+        toast('Скопировано');
+      });
+
+      el.querySelector('.js-share-post').addEventListener('click', async () => {
+        if (navigator.share) {
+          try { await navigator.share({ text: ta.value }); }
+          catch (e) { /* пользователь отменил */ }
+        } else {
+          await copyText(ta.value);
+          toast('Скопировано (системный «Поделиться» недоступен)');
+        }
+      });
+    }
+  };
+}
+
+/* =====================================================================
+   PDF (pdfmake + Roboto для кириллицы)
+   ===================================================================== */
+function makePdf(lessonId) {
+  const l = state.lessons.find(x => x.id === lessonId);
+  if (!l) return;
+
+  if (typeof pdfMake === 'undefined' || !pdfMake || !pdfMake.vfs) {
+    toast('PDF-модуль не загружен. Откройте приложение онлайн один раз.');
+    return;
+  }
+
+  // Шрифт Roboto из vfs_fonts.js — обязателен для кириллицы
+  pdfMake.fonts = {
+    Roboto: {
+      normal: 'Roboto-Regular.ttf',
+      bold: 'Roboto-Medium.ttf',
+      italics: 'Roboto-Italic.ttf',
+      bolditalics: 'Roboto-MediumItalic.ttf'
+    }
+  };
+
+  const c = lessonCounts(l);
+  const enrollments = l.enrollments || [];
+
+  // Таблица: № | ФИО | Статус | Оплата | Сумма
+  const body = [[
+    { text: '№',      style: 'th' },
+    { text: 'ФИО',    style: 'th' },
+    { text: 'Статус', style: 'th' },
+    { text: 'Оплата', style: 'th' },
+    { text: 'Сумма',  style: 'th', alignment: 'right' }
+  ]];
+
+  enrollments.forEach((e, i) => {
+    const s = state.students.find(x => x.id === e.studentId);
+    body.push([
+      { text: String(i + 1), alignment: 'center' },
+      { text: s ? s.name : '—' },
+      { text: statusLabel(e.status) },
+      { text: paymentLabel(e.payment) },
+      { text: e.amount ? fmtMoney(e.amount) : '—', alignment: 'right' }
+    ]);
+  });
+
+  if (!enrollments.length) {
+    body.push([
+      { text: 'Нет записей', colSpan: 5, alignment: 'center', color: '#999999' },
+      {}, {}, {}, {}
+    ]);
+  }
+
+  const content = [
+    { text: 'Список на занятие', fontSize: 20, bold: true, margin: [0, 0, 0, 10] },
+    { text: l.direction || 'Занятие', fontSize: 14, bold: true, margin: [0, 0, 0, 8] },
+    { text: `Дата: ${fmtDate(l.date)}`, margin: [0, 0, 0, 2] },
+    { text: `Время: ${l.start || ''}${l.end ? '–' + l.end : ''}`, margin: [0, 0, 0, 2] },
+    { text: `Зал: ${l.hall || '—'}`, margin: [0, 0, 0, 2] },
+    { text: `Преподаватель: ${l.teacher || '—'}`, margin: [0, 0, 0, 2] }
+  ];
+  if (l.note) content.push({ text: `Заметка: ${l.note}`, margin: [0, 0, 0, 2] });
+
+  content.push(
+    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.7, lineColor: '#cccccc' }],
+      margin: [0, 10, 0, 10] },
+    {
+      table: {
+        headerRows: 1,
+        widths: ['auto', '*', 'auto', 'auto', 'auto'],
+        body
+      },
+      layout: 'lightHorizontalLines'
+    },
+    { text: '', margin: [0, 18] },
+    { text: `Всего записано: ${c.active}`, bold: true, margin: [0, 0, 0, 3] },
+    { text: `Пришло: ${c.attended}`, margin: [0, 0, 0, 3] },
+    { text: `Оплачено: ${c.paidCount}`, margin: [0, 0, 0, 3] },
+    { text: `Сумма сбора: ${fmtMoney(c.sum)}`, bold: true, margin: [0, 0, 0, 3] }
+  );
+
+  const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [40, 40, 40, 40],
+    defaultStyle: { font: 'Roboto', fontSize: 11, color: '#222222' },
+    styles: {
+      th: { bold: true, fillColor: '#f2f2f2', margin: [0, 4, 0, 4] }
+    },
+    content
+  };
+
+  const safeName = (l.direction || 'занятие').replace(/\s+/g, '_').replace(/[\\/:*?"<>|]/g, '');
+  pdfMake.createPdf(docDefinition).download(`Занятие_${l.date}_${safeName}.pdf`);
+}
+
+/* =====================================================================
+   ЭКСПОРТ / ИМПОРТ
+   ===================================================================== */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dance-backup-${todayISO()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Файл сохранён');
+}
+
+function onImportFile(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(String(reader.result));
+      if (!data || typeof data !== 'object' ||
+          !Array.isArray(data.students) || !Array.isArray(data.lessons)) {
+        throw new Error('bad structure');
+      }
+      if (!confirm('Заменить все текущие данные данными из файла?')) return;
+
+      state.students = data.students;
+      state.lessons = data.lessons.map(l => ({
+        ...l,
+        enrollments: Array.isArray(l.enrollments) ? l.enrollments : [],
+        capacity: Number(l.capacity) || DEFAULT_SETTINGS.capacity
+      }));
+      state.settings = Object.assign({}, DEFAULT_SETTINGS, data.settings || {});
+      save();
+      applyTheme();
+      refresh();
+      toast('Данные импортированы');
+    } catch (e) {
+      toast('Не удалось прочитать файл');
+    } finally {
+      ev.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =====================================================================
+   ГЛАВНЫЙ ОБРАБОТЧИК КЛИКОВ (делегирование)
+   ===================================================================== */
+document.addEventListener('click', ev => {
+  // Клик по затемнению — закрыть шторку
+  const overlay = ev.target.closest('.overlay');
+  if (overlay && ev.target === overlay) {
+    closeSheet(overlay.dataset.sheetId);
+    return;
+  }
+
+  const el = ev.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+
+  switch (action) {
+    /* --- вкладки --- */
+    case 'tab':
+      setTab(el.dataset.tab);
+      break;
+
+    /* --- шторки --- */
+    case 'close-sheet':
+      closeSheet(el.dataset.sheet);
+      break;
+
+    /* --- занятия --- */
+    case 'new-lesson':
+      pushSheet(lessonFormSheet(null));
+      break;
+    case 'open-lesson':
+      pushSheet(lessonSheet(el.dataset.id));
+      break;
+    case 'edit-lesson':
+      pushSheet(lessonFormSheet(el.dataset.id));
+      break;
+    case 'delete-lesson': {
+      if (!confirm('Удалить занятие вместе со всеми записями?')) break;
+      state.lessons = state.lessons.filter(l => l.id !== el.dataset.id);
+      save();
+      closeSheet('lesson-' + el.dataset.id);
+      refresh();
+      toast('Занятие удалено');
+      break;
+    }
+    case 'pdf':
+      makePdf(el.dataset.id);
+      break;
+    case 'post':
+      pushSheet(postSheet(el.dataset.id));
+      break;
+
+    /* --- записи на занятие --- */
+    case 'add-student-to-lesson':
+      pushSheet(addStudentSheet(el.dataset.id));
+      break;
+    case 'pick-student':
+      enrollStudent(el.dataset.lesson, el.dataset.id);
+      closeSheet('add-student-' + el.dataset.lesson);
+      refresh();
+      toast('Ученик записан');
+      break;
+    case 'create-student-for-lesson':
+      pushSheet(studentFormSheet(null, { lessonId: el.dataset.lesson }));
+      break;
+    case 'remove-enrollment': {
+      if (!confirm('Убрать ученика из этого занятия?')) break;
+      const l = state.lessons.find(x => x.id === el.dataset.lesson);
+      if (!l) break;
+      l.enrollments = (l.enrollments || []).filter(e => e.id !== el.dataset.enr);
+      save();
+      refresh();
+      break;
+    }
+    case 'set-status': {
+      const e = findEnrollment(el.dataset.lesson, el.dataset.enr);
+      if (e) { e.status = el.dataset.value; save(); refresh(); }
+      break;
+    }
+    case 'set-payment': {
+      const e = findEnrollment(el.dataset.lesson, el.dataset.enr);
+      if (e) { e.payment = el.dataset.value; save(); refresh(); }
+      break;
+    }
+
+    /* --- ученики --- */
+    case 'new-student':
+      pushSheet(studentFormSheet(null));
+      break;
+    case 'open-student': {
+      const id = el.dataset.id;
+      if (id && state.students.some(s => s.id === id)) pushSheet(studentSheet(id));
+      break;
+    }
+    case 'edit-student':
+      pushSheet(studentFormSheet(el.dataset.id));
+      break;
+    case 'delete-student': {
+      const id = el.dataset.id;
+      if (!confirm('Удалить ученика и все его записи из занятий?')) break;
+      state.students = state.students.filter(s => s.id !== id);
+      state.lessons.forEach(l => {
+        l.enrollments = (l.enrollments || []).filter(e => e.studentId !== id);
+      });
+      save();
+      closeSheet('student-form-' + id);
+      closeSheet('student-' + id);
+      refresh();
+      toast('Ученик удалён');
+      break;
+    }
+
+    /* --- настройки --- */
+    case 'export':
+      exportJSON();
+      break;
+    case 'import': {
+      const f = $('#import-file');
+      if (f) f.click();
+      break;
+    }
+    case 'set-theme':
+      state.settings.theme = el.dataset.value;
+      save();
+      applyTheme();
+      refresh();
+      break;
+    case 'clear-all':
+      if (confirm('Удалить ВСЕ данные без возможности восстановления?')) {
+        state.students = [];
+        state.lessons = [];
+        save();
+        refresh();
+        toast('Данные удалены');
+      }
+      break;
+  }
+});
+
+/* Изменение суммы оплаты */
+document.addEventListener('change', ev => {
+  const el = ev.target.closest('[data-action="set-amount"]');
+  if (!el) return;
+  const e = findEnrollment(el.dataset.lesson, el.dataset.enr);
+  if (!e) return;
+  e.amount = Number(el.value) || 0;
+  save();
+  refresh();
+});
+
+/* =====================================================================
+   PWA: иконка, манифест, service worker
+   ===================================================================== */
+/** Генерируем PNG-иконку 180×180 на canvas (Safari не умеет SVG в apple-touch-icon) */
+function generateIcon() {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 180;
+    const ctx = c.getContext('2d');
+
+    const g = ctx.createLinearGradient(0, 0, 180, 180);
+    g.addColorStop(0, '#ff8a7a');
+    g.addColorStop(1, '#ff4d5e');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 180, 180);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 108px -apple-system, "SF Pro Display", Helvetica, Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Т', 90, 96);
+
+    return c.toDataURL('image/png');
+  } catch (e) {
+    return null;
+  }
+}
+
+function setupPWA() {
+  const icon = generateIcon();
+  if (icon) {
+    const link = document.getElementById('apple-icon');
+    if (link) link.href = icon;
+  }
+
+  // Инлайн-манифест через data:URL
+  const manifest = {
+    name: 'Танцы — запись на занятия',
+    short_name: 'Танцы',
+    start_url: location.href,
+    scope: location.href.replace(/[^/]*$/, ''),
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#ffffff',
+    theme_color: '#ff5a5f',
+    lang: 'ru',
+    icons: icon
+      ? [{ src: icon, sizes: '180x180', type: 'image/png', purpose: 'any' }]
+      : []
+  };
+  const mLink = document.getElementById('manifest-link');
+  if (mLink) {
+    mLink.href = 'data:application/manifest+json,' +
+      encodeURIComponent(JSON.stringify(manifest));
+  }
+
+  // Service worker (если рядом лежит sw.js — приложение станет офлайн-первым)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {
+        /* sw.js не найден — не страшно, приложение всё равно работает */
+      });
+    });
+  }
+}
+
+/* =====================================================================
+   СТАРТ
+   ===================================================================== */
+load();
+applyTheme();
+renderView();
+setupPWA();
+
+/* Небольшая «страховка»: сохраняем при уходе со страницы */
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') save();
+});
+</script>
+</body>
+</html>
